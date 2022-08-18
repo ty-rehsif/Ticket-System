@@ -1,0 +1,119 @@
+import java.io.*;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.regex.*;
+
+
+public class A2_Prog38263 {
+    private static Scanner scan;
+
+    /**
+     * @param args
+     */
+    //create arraylists
+    public static void main(String[] args) {
+        //file input
+        String filePath = "C:\\Users\\Tyrese Fisher\\Desktop\\A2\\input_file.txt";
+
+        //create array for type
+        String[] type = {"student", "password", "username", "email", "phone", "postal", "address",
+                "binary", "bio"};
+        //create array for regex
+        String[] regex = {"(\\d{3} ?\\d{3} ?\\d{3})",
+                "[\\w!-~]{12,}",
+                "\\w{3,20}",
+                "(\\w{3,20})@[a-zA-Z]{0,}\\.[a-zA-Z]{0,}",
+                "\\(?(\\d{3})\\)?[ -]?(\\d{3})[ -]?(\\d{4})",
+                "[A-Z][0-9][A-Z] ?[0-9][A-Z][0-9]",
+                "[a-zA-Z0-9]+[\\.\\-]?",
+                "\\b[01]+\\b",
+                "(<\\w+>)(\\w+)[ ]?(<\\/\\w+>)"};
+        //create array list
+        List<String> typeList = Arrays.asList(type);
+        List<String> regexList = Arrays.asList(regex);
+        //open the file
+        openFile(filePath);
+        //read the file and apply regex patterns
+        readFile(filePath, typeList, regexList);
+        //close the file
+        closeFile(filePath);
+
+    }
+
+    /**
+     * @param filePath
+     */
+    public static void openFile(String filePath) {
+        try {
+            scan = new Scanner(Paths.get(filePath));
+        } catch (IOException ioException) {
+            System.err.println("Error opening file");
+            System.exit(1);
+        }
+    }
+
+    /**
+     * @param filePath
+     */
+    public static void closeFile(String filePath) {
+        if (scan != null) {
+            scan.close();
+        }
+    }
+
+    /**
+     * @param filepath
+     * @param typeList
+     * @param regexList
+     */
+    public static void readFile(String filepath, List<String> typeList, List<String> regexList) {
+        //creating variables
+        Pattern pattern;
+        String redoVal= "";
+        Matcher matcher;
+        boolean matchResult;
+        //reading from the file
+        try (BufferedReader input = new BufferedReader(new FileReader(filepath))) {
+            String fileData;
+            int location = 0;
+            //while file has not reached the end
+            while ((fileData = input.readLine()) != null) {
+                //token files
+                String[] tokens = fileData.split(",");
+                String type = tokens[0];
+                String lineToTest = tokens[1];
+                //while string type not equal "previous" hold the last value
+                if (!(type.equals("previous"))) {
+                    redoVal = lineToTest;
+                }
+                //if the string type is found in the array list and matches the file list use the indexes in the array
+                //to apply the regex patterns
+                if(typeList.contains(type)) {
+                    location = typeList.indexOf(type);
+                    pattern = Pattern.compile(regexList.get(location));
+                    matcher = pattern.matcher(lineToTest);
+                    matchResult = matcher.find();
+
+                    if (matchResult && !(type.equals("bio"))) {
+                        System.out.println("yes");
+                        }
+                    //if the string type is in the list, regex finds any html format and the string type is  bio output no because the html was found
+                    else{
+                        System.out.println("no");
+                    }
+                    }
+                //testing the previous line if the string data type is previous
+                else if(type.equals("previous")){
+                    if (redoVal.equals(lineToTest)){
+                        System.out.println("yes");
+                    }
+                    else {
+                        System.out.println("no");
+                    }
+                }
+                }
+        }catch (IOException ioException) {
+            System.out.println("Could not read file");
+            }
+        }
+}
